@@ -10,6 +10,13 @@ window.onload = function() {
         scene.add(light);
     }
     {
+        const color = 0xFFDDDD;
+        const intensity = 1;
+        const light = new THREE.PointLight(color, intensity);
+        light.position.set(4, -3, -3);
+        scene.add(light);
+    }
+    {
         const color = 0x87CEEB;
         const intensity = 0.3;
         const light = new THREE.AmbientLight(color, intensity);
@@ -21,23 +28,23 @@ window.onload = function() {
     document.body.appendChild( renderer.domElement );
 
     const material = new THREE.MeshStandardMaterial( { color: 0xffffff } );
+    
+    
 
-    {
-        let meshA = new THREE.Mesh(new THREE.BoxGeometry(1,1,1));
-        let meshB = new THREE.Mesh(new THREE.BoxGeometry(1,1,1));
-        meshB.position.add(new THREE.Vector3( 0.5, 0.5, 0.5));
-        meshA.updateMatrix();
-        meshB.updateMatrix();
-        let bspA = CSG.fromMesh( meshA );
-        let bspB = CSG.fromMesh( meshB );
-        let bspResult = bspA.subtract(bspB);
-        let meshResult = CSG.toMesh( bspResult, meshA.matrix, material );
-        scene.add( meshResult );
-    }
+    let cube1 = new THREE.Mesh(new THREE.BoxGeometry(1,1,1));
+    let cuboid1 = new THREE.Mesh(new THREE.BoxGeometry(1,1,3));
+    cuboid1.rotation.set( 0.1, 0.15, 0.18 );
+    cube1.updateMatrix();
+    cuboid1.updateMatrix();
+    let bspA = CSG.fromMesh( cube1 );
+    let bspB = CSG.fromMesh( cuboid1 );
+    let bspResult = bspA.subtract(bspB);
+    let meshResult = CSG.toMesh( bspResult, cube1.matrix, material );
+    scene.add( meshResult );
 
-    camera.position.z = 5;
-    camera.position.y = 2;
     camera.position.x = 1;
+    camera.position.y = 2;
+    camera.position.z = 5;
 
     orbit_controls = new THREE.OrbitControls( camera, renderer.domElement );
 
