@@ -27,16 +27,20 @@ window.onload = function() {
     renderer.setSize( window.innerWidth, window.innerHeight );
     document.body.appendChild( renderer.domElement );
 
-    const cube1_material = new THREE.MeshStandardMaterial( { color: 0xff0000 } );
-    const cube2_material = new THREE.MeshStandardMaterial( { color: 0x0000ff } );
-    const cube3_material = new THREE.MeshStandardMaterial( { color: 0x00ff00 } );
+    const cube1_material = new THREE.MeshStandardMaterial( { color: 0xff0000, wireframe: true } );
+    const cube2_material = new THREE.MeshStandardMaterial( { color: 0x0000ff, wireframe: true } );
+    const cube3_material = new THREE.MeshStandardMaterial( { color: 0x00ff00, wireframe: true } );
+    const cube1intersetcube3_material = new THREE.MeshStandardMaterial( { color: 0xff00ff, wireframe: false } );
 
     let cube1 = new THREE.Mesh(new THREE.BoxGeometry(1,1,1));
     let cuboid1 = new THREE.Mesh(new THREE.BoxGeometry(1,1,2));
     let cube2 = new THREE.Mesh(new THREE.BoxGeometry(1,1,1), cube2_material);
     let cuboid2 = new THREE.Mesh(new THREE.BoxGeometry(1,1,2), cube3_material);
+    let cube3 = new THREE.Mesh(new THREE.BoxGeometry(1,1,1), cube3_material);
+    scene.add(cube3);
     cube1.updateMatrix();
     cube2.updateMatrix();
+    cube3.updateMatrix();
     cuboid1.updateMatrix();
     cuboid2.updateMatrix();
     let bspCube1 = CSG.fromMesh( cube1 );
@@ -49,6 +53,11 @@ window.onload = function() {
     let bspDrilledCube2 = bspCube2.subtract(bspCuboid2);
     meshDrilledCube2 = CSG.toMesh( bspDrilledCube2, cube2.matrix, cube2_material );
     scene.add( meshDrilledCube2 );
+    // intersect cube3 with drilled cube1
+    let bspCube3 = CSG.fromMesh( cube3 );
+    let bspCube1IntersectCube3 = bspDrilledCube1.intersect( bspCube3 );
+    meshCube1IntersectCube3 = CSG.toMesh( bspCube1IntersectCube3, cube1.matrix, cube1intersetcube3_material );
+    scene.add( meshCube1IntersectCube3 );
 
     camera.position.x = 1;
     camera.position.y = 2;
@@ -76,7 +85,7 @@ window.onload = function() {
     targetQuaternion2.normalize();
     
     const clock = new THREE.Clock();
-    const speed = 2;
+    const speed = 0.2;
 
     document.addEventListener("keydown", onDocumentKeyDown, false);
     function onDocumentKeyDown(event) {
@@ -93,9 +102,10 @@ window.onload = function() {
         if(spinning) {
             scene.remove( meshDrilledCube1 );
             scene.remove( meshDrilledCube2 );
+            scene.remove( meshCube1IntersectCube3 );
             const delta = clock.getDelta();
             if ( ! cuboid1.quaternion.equals( targetQuaternion1 ) ) {
-                const step = 0.2 * delta;
+                const step = speed * delta;
                 cuboid1.quaternion.rotateTowards( targetQuaternion1, step );
                 cube2.setRotationFromQuaternion( cuboid1.quaternion );
             }
@@ -104,26 +114,40 @@ window.onload = function() {
                 targetQuaternion1.normalize();
             }
             if ( ! cuboid2.quaternion.equals( targetQuaternion2 ) ) {
-                const step = 0.2 * delta;
+                const step = speed * delta;
                 cuboid2.quaternion.rotateTowards( targetQuaternion2, step );
+                cube3.setRotationFromQuaternion( cuboid2.quaternion );
             }
             else {
                 targetQuaternion2.random();
                 targetQuaternion2.normalize();
             }
             cube2.updateMatrix();
+            cube3.updateMatrix();
             cuboid1.updateMatrix();
             cuboid2.updateMatrix();
+            // subtract cuboid1 from cube1
             let bspCube1 = CSG.fromMesh( cube1 );
             let bspCuboid1 = CSG.fromMesh( cuboid1 );
             let bspDrilledCube1 = bspCube1.subtract(bspCuboid1);
             meshDrilledCube1 = CSG.toMesh( bspDrilledCube1, cube1.matrix, cube1_material );
             scene.add( meshDrilledCube1 );
+            // subtract cuboid2 from cube2
             let bspCube2 = CSG.fromMesh( cube2 );
             let bspCuboid2 = CSG.fromMesh( cuboid2 );
             let bspDrilledCube2 = bspCube2.subtract(bspCuboid2);
             meshDrilledCube2 = CSG.toMesh( bspDrilledCube2, cube2.matrix, cube2_material );
             scene.add( meshDrilledCube2 );
+            // intersect cube3 with drilled cube1
+            let bspCube3 = CSG.fromMesh( cube3 );
+            let bspCube1IntersectCube3 = bspDrilledCube1.intersect( bspCube3 );
+            meshCube1IntersectCube3 = CSG.toMesh( bspCube1IntersectCube3, cube1.matrix, cube1intersetcube3_material );
+            scene.add( meshCube1IntersectCube3 );
+            if( meshCube1IntersectCube3.geometry.attributes.position.array.length == 0 ) {
+                console.log( 'meshCube1IntersectCube3 vertices:', meshCube1IntersectCube3.geometry.attributes.position.array.length );
+                console.log(cuboid1.quaternion, cuboid2.quaternion);
+                spinning = false;
+            }
             render();
         }
 
