@@ -10,14 +10,14 @@ window.onload = function() {
         scene.add(light);
     }
     {
-        const color = 0xFFDDDD;
+        const color = 0xFFFFFF;
         const intensity = 1;
         const light = new THREE.PointLight(color, intensity);
         light.position.set(4, -3, -3);
         scene.add(light);
     }
     {
-        const color = 0x87CEEB;
+        const color = 0xFFFFFF;//0x87CEEB;
         const intensity = 0.3;
         const light = new THREE.AmbientLight(color, intensity);
         scene.add(light);
@@ -27,24 +27,22 @@ window.onload = function() {
     renderer.setSize( window.innerWidth, window.innerHeight );
     document.body.appendChild( renderer.domElement );
 
-    const material = new THREE.MeshStandardMaterial( { color: 0xffffff } );
-    
-    
+    const cube1_material = new THREE.MeshStandardMaterial( { color: 0xff0000 } );
+    const cube2_material = new THREE.MeshStandardMaterial( { color: 0x0000ff } );
 
     let cube1 = new THREE.Mesh(new THREE.BoxGeometry(1,1,1));
-    let cuboid1 = new THREE.Mesh(new THREE.BoxGeometry(1,1,3));
-    cuboid1.rotation.set( 0.1, 0.15, 0.18 );
+    let cuboid1 = new THREE.Mesh(new THREE.BoxGeometry(1,1,2), cube2_material);
     cube1.updateMatrix();
     cuboid1.updateMatrix();
     let bspA = CSG.fromMesh( cube1 );
     let bspB = CSG.fromMesh( cuboid1 );
     let bspResult = bspA.subtract(bspB);
-    let meshResult = CSG.toMesh( bspResult, cube1.matrix, material );
+    meshResult = CSG.toMesh( bspResult, cube1.matrix, cube1_material );
     scene.add( meshResult );
 
     camera.position.x = 1;
     camera.position.y = 2;
-    camera.position.z = 5;
+    camera.position.z = 3;
 
     orbit_controls = new THREE.OrbitControls( camera, renderer.domElement );
 
@@ -57,10 +55,39 @@ window.onload = function() {
     renderer.domElement.addEventListener( 'touchend',  render, false );
     renderer.domElement.addEventListener( 'touchcancel',  render, false );
     renderer.domElement.addEventListener( 'wheel',  render, false );
-    
+
+    const targetQuaternion = new THREE.Quaternion();
+    targetQuaternion.random();
+    targetQuaternion.normalize();
+    const clock = new THREE.Clock();
+    const speed = 2;
+
     function render() {
         renderer.render( scene, camera );
     }
-    
-    render();
+
+    function animate() {
+        scene.remove( meshResult );
+        const delta = clock.getDelta();
+        if ( ! cuboid1.quaternion.equals( targetQuaternion ) ) {
+            const step = 0.5 * delta;
+            cuboid1.quaternion.rotateTowards( targetQuaternion, step );
+        }
+        else {
+            targetQuaternion.random();
+            targetQuaternion.normalize();
+            iFrame = 0;
+        }
+        cuboid1.updateMatrix();
+        let bspA = CSG.fromMesh( cube1 );
+        let bspB = CSG.fromMesh( cuboid1 );
+        let bspResult = bspA.subtract(bspB);
+        meshResult = CSG.toMesh( bspResult, cube1.matrix, cube1_material );
+        scene.add( meshResult );
+        render();
+
+        requestAnimationFrame( animate );
+    }
+
+    animate();
 }
