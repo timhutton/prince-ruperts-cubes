@@ -29,7 +29,7 @@ window.onload = function() {
     const cube1_material = new THREE.MeshStandardMaterial( { color: 0xff0000, wireframe: false, transparent:true, opacity:0.5 } );
     const cube2_material = new THREE.MeshStandardMaterial( { color: 0x0000ff, wireframe: false, transparent:true, opacity:0.5 } );
     const cube3_material = new THREE.MeshStandardMaterial( { color: 0x00ff00, wireframe: true, transparent:true, opacity:0.5 } );
-    const cube1intersetcube3_material = new THREE.MeshStandardMaterial( { color: 0xff00ff, wireframe: false } );
+    const cube1intersectcube3_material = new THREE.MeshStandardMaterial( { color: 0xff00ff, wireframe: false } );
 
     let cube1 = new THREE.Mesh(new THREE.BoxGeometry(1,1,1));
     let cuboid1 = new THREE.Mesh(new THREE.BoxGeometry(1,1,2));
@@ -55,7 +55,7 @@ window.onload = function() {
     // intersect cube3 with drilled cube1
     let bspCube3 = CSG.fromMesh( cube3 );
     let bspCube1IntersectCube3 = bspDrilledCube1.intersect( bspCube3 );
-    meshCube1IntersectCube3 = CSG.toMesh( bspCube1IntersectCube3, cube1.matrix, cube1intersetcube3_material );
+    meshCube1IntersectCube3 = CSG.toMesh( bspCube1IntersectCube3, cube1.matrix, cube1intersectcube3_material );
     scene.add( meshCube1IntersectCube3 );
 
     camera.position.x = 0.5;
@@ -108,7 +108,7 @@ window.onload = function() {
                 break;
             case 'm':
             case 'M':
-                cube1intersetcube3_material.wireframe = !cube1intersetcube3_material.wireframe;
+                cube1intersectcube3_material.wireframe = !cube1intersectcube3_material.wireframe;
                 break;
         }
         render();
@@ -161,7 +161,7 @@ window.onload = function() {
             // intersect cube3 with drilled cube1
             let bspCube3 = CSG.fromMesh( cube3 );
             let bspCube1IntersectCube3 = bspDrilledCube1.intersect( bspCube3 );
-            meshCube1IntersectCube3 = CSG.toMesh( bspCube1IntersectCube3, cube1.matrix, cube1intersetcube3_material );
+            meshCube1IntersectCube3 = CSG.toMesh( bspCube1IntersectCube3, cube1.matrix, cube1intersectcube3_material );
             scene.add( meshCube1IntersectCube3 );
             if( meshCube1IntersectCube3.geometry.attributes.position.array.length == 0 ) {
                 console.log( 'meshCube1IntersectCube3 vertices:', meshCube1IntersectCube3.geometry.attributes.position.array.length );
