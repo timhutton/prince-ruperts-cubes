@@ -1,6 +1,9 @@
 window.onload = function() {
     const scene = new THREE.Scene();
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setSize( window.innerWidth * 0.8, window.innerHeight * 0.8 );
     const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+    document.body.appendChild( renderer.domElement );
 
     {
         const color = 0xFFFFFF;
@@ -23,13 +26,9 @@ window.onload = function() {
         scene.add(light);
     }
 
-    const renderer = new THREE.WebGLRenderer();
-    renderer.setSize( window.innerWidth, window.innerHeight );
-    document.body.appendChild( renderer.domElement );
-
-    const cube1_material = new THREE.MeshStandardMaterial( { color: 0xff0000, wireframe: true } );
-    const cube2_material = new THREE.MeshStandardMaterial( { color: 0x0000ff, wireframe: true } );
-    const cube3_material = new THREE.MeshStandardMaterial( { color: 0x00ff00, wireframe: true } );
+    const cube1_material = new THREE.MeshStandardMaterial( { color: 0xff0000, wireframe: false, transparent:true, opacity:0.5 } );
+    const cube2_material = new THREE.MeshStandardMaterial( { color: 0x0000ff, wireframe: false, transparent:true, opacity:0.5 } );
+    const cube3_material = new THREE.MeshStandardMaterial( { color: 0x00ff00, wireframe: true, transparent:true, opacity:0.5 } );
     const cube1intersetcube3_material = new THREE.MeshStandardMaterial( { color: 0xff00ff, wireframe: false } );
 
     let cube1 = new THREE.Mesh(new THREE.BoxGeometry(1,1,1));
@@ -59,9 +58,9 @@ window.onload = function() {
     meshCube1IntersectCube3 = CSG.toMesh( bspCube1IntersectCube3, cube1.matrix, cube1intersetcube3_material );
     scene.add( meshCube1IntersectCube3 );
 
-    camera.position.x = 1;
-    camera.position.y = 2;
-    camera.position.z = 3;
+    camera.position.x = 0.5;
+    camera.position.y = 0.6;
+    camera.position.z = 1.5;
     spinning = true;
 
     orbit_controls = new THREE.OrbitControls( camera, renderer.domElement );
@@ -89,9 +88,30 @@ window.onload = function() {
 
     document.addEventListener("keydown", onDocumentKeyDown, false);
     function onDocumentKeyDown(event) {
-        spinning = !spinning;
-        if(spinning) clock.start();
-        if(!spinning) clock.stop();
+        switch(event.key) {
+            case ' ':
+                spinning = !spinning;
+                if(spinning) clock.start();
+                if(!spinning) clock.stop();
+                break;
+            case 'r':
+            case 'R':
+                cube1_material.wireframe = !cube1_material.wireframe;
+                break;
+            case 'b':
+            case 'B':
+                cube2_material.wireframe = !cube2_material.wireframe;
+                break;
+            case 'g':
+            case 'G':
+                cube3_material.wireframe = !cube3_material.wireframe;
+                break;
+            case 'm':
+            case 'M':
+                cube1intersetcube3_material.wireframe = !cube1intersetcube3_material.wireframe;
+                break;
+        }
+        render();
     }
 
     function render() {
